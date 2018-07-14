@@ -81,6 +81,8 @@ func gen_str(str: char const*, multiline: bool) {
 }
 
 func gen_sync_pos(pos: SrcPos) {
+    // TODO Source maps.
+    return;
     if (gen_pos.line != pos.line || gen_pos.name != pos.name) {
         genln(); buf_printf(&gen_buf, "#line %d", pos.line);
         if (gen_pos.name != pos.name) {
@@ -188,6 +190,12 @@ func get_gen_name(ptr: void const*): char const* {
 }
 
 func typespec_to_cdecl(typespec: Typespec*, str: char const*): char* {
+    if (str) {
+        result: char*;
+        buf_printf(&result, "%s", str);
+        return result;
+    }
+    // TODO Typescript output?
     if (!typespec) {
         return strf("void%s%s", *str ? " " : "", str);
     }
@@ -230,9 +238,7 @@ func gen_func_decl(decl: Decl*) {
     #assert(decl.kind == DECL_FUNC);
     result: char* = NULL;
     buf_printf(&result, "%s(", get_gen_name(decl));
-    if (decl.function.num_params == 0) {
-        buf_printf(&result, "void");
-    } else {
+    if (decl.function.num_params > 0) {
         for (i: usize = 0; i < decl.function.num_params; i++) {
             param := decl.function.params[i];
             if (i != 0) {
@@ -246,11 +252,11 @@ func gen_func_decl(decl: Decl*) {
     }
     buf_printf(&result, ")");
     gen_sync_pos(decl.pos);
-    if (decl.function.ret_type) {
-        genln(); buf_printf(&gen_buf, "%s", typespec_to_cdecl(decl.function.ret_type, result));
-    } else {
-        genln(); buf_printf(&gen_buf, "void %s", result);
-    }
+    genln(); buf_printf(&gen_buf, "function %s", result);
+    // TODO Typescript types?
+    // if (decl.function.ret_type) {
+    //     buf_printf(&gen_buf, " -> %s", typespec_to_cdecl(decl.function.ret_type, result));
+    // }
 }
 
 func gen_reachable(sym: Sym*): bool {
@@ -582,7 +588,7 @@ func gen_stmt(stmt: Stmt*) {
         gen_stmt_block(stmt.block);
     case STMT_NOTE:
         if (stmt.note.name == assert_name) {
-            genln(); buf_printf(&gen_buf, "assert(");
+            genln(); buf_printf(&gen_buf, "console.assert(");
             #assert(stmt.note.num_args == 1);
             gen_expr(stmt.note.args[0].expr);
             buf_printf(&gen_buf, ");");
@@ -1103,20 +1109,20 @@ func gen_all() {
     preprocess_packages();
     gen_buf = NULL;
     gen_preamble();
-    gen_foreign_headers();
-    genln();
-    genln(); buf_printf(&gen_buf, "// Forward declarations");
-    gen_forward_decls();
-    genln();
-    genln(); buf_printf(&gen_buf, "// Sorted declarations");
-    gen_sorted_decls();
-    genln(); buf_printf(&gen_buf, "// Typeinfo");
-    gen_typeinfos();
-    genln();
+    // gen_foreign_headers();
+    // genln();
+    // genln(); buf_printf(&gen_buf, "// Forward declarations");
+    // gen_forward_decls();
+    // genln();
+    // genln(); buf_printf(&gen_buf, "// Sorted declarations");
+    // gen_sorted_decls();
+    // genln(); buf_printf(&gen_buf, "// Typeinfo");
+    // gen_typeinfos();
+    // genln();
     genln(); buf_printf(&gen_buf, "// Definitions");
     gen_defs();
-    genln(); buf_printf(&gen_buf, "// Foreign source files");
-    gen_foreign_sources();
-    genln();
+    // genln(); buf_printf(&gen_buf, "// Foreign source files");
+    // gen_foreign_sources();
+    // genln();
     gen_postamble();
 }
