@@ -1,7 +1,8 @@
-#always
-
-@foreign
-func main(argc: int, argv: char const**): int;
+func main(argc: int, argv: char const**): int {
+	n := 5;
+	#assert(inc(n) == n + 1);
+	return 0;
+}
 
 func inc(n: int): int {
 	return n + 1;
