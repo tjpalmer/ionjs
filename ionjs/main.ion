@@ -1,4 +1,39 @@
-import ion {...}
+// Import everything from ion that gen needs, so we don't need to change the
+// gen file.
+import ion {
+    AGGREGATE_ITEM_FIELD, AGGREGATE_ITEM_SUBAGGREGATE, AGGREGATE_STRUCT,
+    CMPL_TYPE_ARRAY, CMPL_TYPE_BOOL, CMPL_TYPE_CHAR, CMPL_TYPE_CONST,
+    CMPL_TYPE_DOUBLE, CMPL_TYPE_ENUM, CMPL_TYPE_FLOAT, CMPL_TYPE_FUNC,
+    CMPL_TYPE_INCOMPLETE, CMPL_TYPE_INT, CMPL_TYPE_LLONG, CMPL_TYPE_LONG,
+    CMPL_TYPE_NONE, CMPL_TYPE_PTR, CMPL_TYPE_SCHAR, CMPL_TYPE_SHORT,
+    CMPL_TYPE_STRUCT, CMPL_TYPE_UCHAR, CMPL_TYPE_UINT, CMPL_TYPE_ULLONG,
+    CMPL_TYPE_ULONG, CMPL_TYPE_UNION, CMPL_TYPE_USHORT, CMPL_TYPE_VOID,
+    DECL_CONST, DECL_ENUM, DECL_FUNC, DECL_IMPORT, DECL_NOTE, DECL_STRUCT,
+    DECL_TYPEDEF, DECL_UNION, DECL_VAR,
+    EXPR_ALIGNOF_EXPR, EXPR_ALIGNOF_TYPE, EXPR_BINARY, EXPR_CALL, EXPR_CAST,
+    EXPR_COMPOUND, EXPR_FIELD, EXPR_FLOAT, EXPR_INDEX, EXPR_INT, EXPR_MODIFY,
+    EXPR_NAME, EXPR_OFFSETOF, EXPR_PAREN, EXPR_SIZEOF_EXPR, EXPR_SIZEOF_TYPE,
+    EXPR_STR, EXPR_TERNARY, EXPR_TYPEOF_EXPR, EXPR_TYPEOF_TYPE, EXPR_UNARY,
+    FIELD_INDEX, FIELD_NAME, MAX_PATH,
+    MOD_BIN, MOD_CHAR, MOD_HEX, MOD_MULTILINE, MOD_OCT,
+    NUM_CMPL_TYPE_KINDS,
+    REACHABLE_NATURAL, SUFFIX_D,
+    STMT_ASSIGN, STMT_BLOCK, STMT_BREAK, STMT_CONTINUE, STMT_DO_WHILE,
+    STMT_EXPR, STMT_IF, STMT_INIT, STMT_FOR, STMT_GOTO, STMT_LABEL, STMT_NOTE,
+    STMT_RETURN, STMT_SWITCH, STMT_WHILE, SYM_CONST, SYM_RESOLVED, SYM_TYPE,
+    TYPESPEC_ARRAY, TYPESPEC_CONST, TYPESPEC_FUNC, TYPESPEC_NAME, TYPESPEC_PTR,
+    Aggregate, Decl, Expr, Map, Note, Package, SrcPos, Stmt, StmtList, Sym,
+    Type, Typespec,
+    assert_name, buf_end, buf_len, buf_printf, buf_push, complete_name,
+    fatal_error, flag_fullgen, flag_notypeinfo, foreign_name, gen_buf,
+    get_resolved_expected_type, get_resolved_sym, get_resolved_type,
+    get_resolved_val, get_stmt_note, get_type_from_typeid, ion_main,
+    is_decl_foreign, is_incomplete_array_type, is_ptr_type,
+    map_get, map_put, next_typeid, new_expr_int, new_typespec_array,
+    package_list, path_absolute, path_copy, path_join, sorted_syms, str_intern,
+    strf, token_kind_name, token_suffix_names, type_names, type_sizeof,
+    unqualify_type,
+}
 import libc {...}
 
 // // Keep everything for now, because c code needs to access some things that ion
@@ -6,6 +41,5 @@ import libc {...}
 // #always
 
 func main(argc: int, argv: char const**): int {
-		printf("Totally js!\n");
-    return ion_main(argc, argv);
+    return ion_main(argc, argv, gen_all, "js");
 }
