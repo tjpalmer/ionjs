@@ -15,7 +15,7 @@ var gen_postamble_str: char const* = """
 """;
 
 func genln() {
-    buf_printf(&gen_buf, "\n%.*s", gen_indent * 4, "                                                                  ");
+    buf_printf(&gen_buf, "\n%.*s", gen_indent * 2, "                                                                  ");
     gen_pos.line++;
 }
 
@@ -108,6 +108,11 @@ func cdecl_name(type: Type*): char const* {
 }
 
 func type_to_cdecl(type: Type*, str: char const*): char* {
+    if (str) {
+        result: char*;
+        buf_printf(&result, "%s", str);
+        return result;
+    }
     switch (type.kind) {
     case CMPL_TYPE_PTR:
         return type_to_cdecl(type.base, cdecl_paren(strf("*%s", str), *str));
@@ -234,7 +239,7 @@ func typespec_to_cdecl(typespec: Typespec*, str: char const*): char* {
     }
 }
 
-func gen_func_decl(decl: Decl*) {
+func gen_func_decl(decl: Decl*, export: bool) {
     #assert(decl.kind == DECL_FUNC);
     result: char* = NULL;
     buf_printf(&result, "%s(", get_gen_name(decl));
@@ -252,7 +257,7 @@ func gen_func_decl(decl: Decl*) {
     }
     buf_printf(&result, ")");
     gen_sync_pos(decl.pos);
-    genln(); buf_printf(&gen_buf, "function %s", result);
+    genln(); buf_printf(&gen_buf, "%sfunction %s", export ? "export " : "", result);
     // TODO Typescript types?
     // if (decl.function.ret_type) {
     //     buf_printf(&gen_buf, " -> %s", typespec_to_cdecl(decl.function.ret_type, result));
@@ -546,14 +551,14 @@ func gen_simple_stmt(stmt: Stmt*) {
                 size := new_expr_int(init_typespec.pos, get_resolved_type(stmt.init.expr).num_elems, 0, 0);
                 init_typespec = new_typespec_array(init_typespec.pos, init_typespec.base, size);
             }
-            buf_printf(&gen_buf, "%s = ", typespec_to_cdecl(stmt.init.type, stmt.init.name));
+            buf_printf(&gen_buf, "let %s = ", typespec_to_cdecl(stmt.init.type, stmt.init.name));
             if (stmt.init.expr) {
                 gen_expr(stmt.init.expr);
             } else {
                 buf_printf(&gen_buf, "{0}");
             }
         } else {
-            buf_printf(&gen_buf, "%s = ", type_to_cdecl(unqualify_type(get_resolved_type(stmt.init.expr)), stmt.init.name));
+            buf_printf(&gen_buf, "let %s = ", type_to_cdecl(unqualify_type(get_resolved_type(stmt.init.expr)), stmt.init.name));
             gen_expr(stmt.init.expr);
         }
     case STMT_ASSIGN:
@@ -760,7 +765,7 @@ func gen_decl(sym: Sym*) {
         }
         buf_printf(&gen_buf, ";");
     case DECL_FUNC:
-        gen_func_decl(decl);
+        gen_func_decl(decl, false);
         buf_printf(&gen_buf, ";");
     case DECL_STRUCT:
     case DECL_UNION:
@@ -791,6 +796,7 @@ func gen_sorted_decls() {
 }
 
 func gen_defs() {
+    from_vars := false;
     for (it: Sym** = sorted_syms; it != buf_end(sorted_syms, sizeof(*sorted_syms)); it++) {
         sym := *it;
         decl := sym.decl;
@@ -798,21 +804,26 @@ func gen_defs() {
             continue;
         }
         if (decl.kind == DECL_FUNC) {
-            gen_func_decl(decl);
+            if (from_vars) {
+                genln();
+            }
+            gen_func_decl(decl, true);
             buf_printf(&gen_buf, " ");
             gen_stmt_block(decl.function.block);
             genln();
+            from_vars = false;
         } else if (decl.kind == DECL_VAR) {
             if (decl.var_decl.type && !is_incomplete_array_typespec(decl.var_decl.type)) {
-                genln(); buf_printf(&gen_buf, "%s", typespec_to_cdecl(decl.var_decl.type, get_gen_name(sym)));
+                genln(); buf_printf(&gen_buf, "export let %s", typespec_to_cdecl(decl.var_decl.type, get_gen_name(sym)));
             } else {
-                genln(); buf_printf(&gen_buf, "%s", type_to_cdecl(sym.type, get_gen_name(sym)));
+                genln(); buf_printf(&gen_buf, "export let %s", type_to_cdecl(sym.type, get_gen_name(sym)));
             }
             if (decl.var_decl.expr) {
                 buf_printf(&gen_buf, " = ");
                 gen_expr(decl.var_decl.expr);
             }
             buf_printf(&gen_buf, ";");
+            from_vars = true;
         }
     }
 }
@@ -1108,7 +1119,7 @@ func gen_postamble() {
 func gen_all() {
     preprocess_packages();
     gen_buf = NULL;
-    gen_preamble();
+    // gen_preamble();
     // gen_foreign_headers();
     // genln();
     // genln(); buf_printf(&gen_buf, "// Forward declarations");
@@ -1124,5 +1135,5 @@ func gen_all() {
     // genln(); buf_printf(&gen_buf, "// Foreign source files");
     // gen_foreign_sources();
     // genln();
-    gen_postamble();
+    // gen_postamble();
 }

@@ -1,0 +1,13 @@
+{
+  "name": "ionjs",
+  "version": "0.0.1",
+  "description": "JS compiler for ion",
+  "author": "Tom",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "parcel-bundler": "^1.9.6"
+  },
+  "scripts": {
+    "start": "parcel test.html --out-dir bin"
+  }
+}
