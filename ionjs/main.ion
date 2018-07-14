@@ -1,0 +1,11 @@
+import ion {...}
+import libc {...}
+
+// // Keep everything for now, because c code needs to access some things that ion
+// // doesn't.
+// #always
+
+func main(argc: int, argv: char const**): int {
+		printf("Totally js!\n");
+    return ion_main(argc, argv);
+}
